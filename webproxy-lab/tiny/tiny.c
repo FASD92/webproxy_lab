@@ -282,14 +282,12 @@ void clienterror(int fd, char *cause, char *errnum,
   char buf[MAXLINE], body[MAXBUF];
 
   /* Build the HTTP response body */
-  sprintf(body, "<html><title>Tiny Error</title>");
-  sprintf(body, "%s<body bgcolor="
-                "ffffff"
-                ">\r\n",
-          body);
-  sprintf(body, "%s%s: %s\r\n", body, errnum, shortmsg);
-  sprintf(body, "%s<p>%s: %s\r\n", body, longmsg, cause);
-  sprintf(body, "%s<hr><em>The Tiny Web server</em>\r\n", body);
+  int n = 0;
+  n += snprintf(body + n, MAXBUF - n, "<html><title>Tiny Error</title>");
+  n += snprintf(body + n, MAXBUF - n, "<body bgcolor=\"ffffff\">\r\n");
+  n += snprintf(body + n, MAXBUF - n, "%s: %s\r\n", errnum, shortmsg);
+  n += snprintf(body + n, MAXBUF - n, "<p>%s: %s\r\n", longmsg, cause);
+  n += snprintf(body + n, MAXBUF - n, "<hr><em>The Tiny Web server</em>\r\n");
 
   /* Print the HTTP response */
   sprintf(buf, "HTTP/1.0 %s %s\r\n", errnum, shortmsg);
