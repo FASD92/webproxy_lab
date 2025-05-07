@@ -146,7 +146,7 @@ void get_filetype(char *filename, char *filetype)
         strcpy(filetype, "text/plain");
 }
 
-/* Internal dynamic CGI handler (no fork/exec) */
+// 동적 컨텐츠 처리 CGI 프로그램 내부 이식(without fork+exec)
 void serve_dynamic(int fd, char *filename, char *cgiargs)
 {
     if (strstr(filename, "adder")) {
