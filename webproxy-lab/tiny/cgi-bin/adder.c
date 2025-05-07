@@ -14,11 +14,19 @@ int main(void)
   if ((buf = getenv("QUERY_STRING")) != NULL)
   {
     p = strchr(buf, '&');
-    *p = '\0';
-    strcpy(arg1, buf);
-    strcpy(arg2, p + 1);
-    n1 = atoi(arg1);
-    n2 = atoi(arg2);
+    if (p != NULL)
+    {
+      *p = '\0';
+      strcpy(arg1, buf);
+      strcpy(arg2, p + 1);
+      
+      char *res1 = strchr(arg1, '=');
+      char *res2 = strchr(arg2, '=');
+      if (res1 != NULL) n1 = atoi(res1 + 1);
+      else n1 = atoi(arg1);
+      if (res2 != NULL) n2 = atoi(res2 + 1);
+      else n2 = atoi(arg2);
+    }
   }
 
   /* Make the response body */
