@@ -15,6 +15,7 @@ void clienterror(int fd, char *cause, char *errnum, char *shortmsg, char *longms
 int parse_uri(char *uri, char *hostname, char *port, char *path);
 void handle_request(int connfd);
 void read_requesthdrs(rio_t *rp);
+void *thread(void *vargp);  // <-- 추가
 
 /* You won't lose style points for including this long line in your code */
 static const char *user_agent_hdr =
@@ -23,10 +24,11 @@ static const char *user_agent_hdr =
 
 int main(int argc, char **argv)
 {
-  int listenfd, connfd;
+  int listenfd;
   socklen_t clientlen;
   struct sockaddr_storage clientaddr;
   char hostname[MAXLINE], port[MAXLINE];
+  pthread_t tid;
 
 
   if (argc != 2) {
@@ -38,12 +40,14 @@ int main(int argc, char **argv)
 
   while (1) {
       clientlen = sizeof(clientaddr);
-      connfd = Accept(listenfd, (SA *)&clientaddr, &clientlen);
+
+      int *connfdp = Malloc(sizeof(int));
+      *connfdp = Accept(listenfd, (SA *)&clientaddr, &clientlen);
+
+      Pthread_create(&tid, NULL, thread, connfdp);
+
       Getnameinfo((SA *)&clientaddr, clientlen, hostname, MAXLINE, port, MAXLINE, 0);
       printf("Accepted connection from (%s, %s)\n", hostname, port);
-      handle_request(connfd);
-
-      Close(connfd);
   }
 }
 
@@ -184,4 +188,14 @@ void read_requesthdrs(rio_t *rp)
         Rio_readlineb(rp, buf, MAXLINE);
         printf("%s", buf);
     }
+}
+
+void *thread(void *vargp)
+{
+    int connfd = *((int *)vargp);
+    Pthread_detach(pthread_self());
+    Free(vargp);
+    handle_request(connfd);
+    Close(connfd);
+    return NULL;
 }
